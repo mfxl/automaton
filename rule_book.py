@@ -191,8 +191,8 @@ rule126_8bits = {
         "type": "state"
 }
 
-# Totalistic 7 bits
-code777_7bits = {
+# ternary
+code777_7trits = {
         2:   1,
         1.7: 0,
         1.3: 0,
@@ -201,7 +201,7 @@ code777_7bits = {
         0.3: 1,
         0:   0,
         "genesis": 0.5,
-        "title": "Code 777 (7 bits)",
+        "title": "Code 777 (7 trits)",
         "scan": 3,
         "type": "avg"
 }
