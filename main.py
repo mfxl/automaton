@@ -6,12 +6,18 @@ import rule_book
 np.set_printoptions(threshold=sys.maxsize)
 
 def apply_rule(rule: dict, grid: np.ndarray, steps=40) -> np.ndarray:
+    """
+    Executes the automaton for a given rule
+    :param rule: dict, dictionary containing the rule for the automaton
+    :param grid: np.ndarray, initial grid on which the automaton runs
+    :param steps: int, number of evolutionary steps > 0
+    :return grid: np.ndarray, final grid containing all states
+    """
     _dim = grid.shape[0] - 1
-    _bit = len(rule) - 2
 
-    if _bit == 2**3:
+    if rule["scan"] == 3:
         _start_column, _end_column, up_search, down_search = 1, _dim, 1, 1
-    elif _bit == 2**5:
+    elif rule["scan"] == 5:
         _start_column, _end_column, up_search, down_search = 2, _dim - 1, 2, 2
     else:
         raise()
@@ -20,10 +26,17 @@ def apply_rule(rule: dict, grid: np.ndarray, steps=40) -> np.ndarray:
     genesis_col = int(_dim * rule["genesis"])
     grid[0, genesis_col] = 1
 
-    for r in np.arange(1, steps + 1):
-        for c in range(_start_column, _end_column):
-            state = grid[r - 1, c - down_search: c + up_search + 1]
-            grid[r, c] = rule[str(state)]
+    if rule["type"] == "state":  # takes the original state of the scanned cells
+        for r in np.arange(1, steps + 1):
+            for c in range(_start_column, _end_column):
+                scanned_states = grid[r - 1, c - down_search: c + up_search + 1]
+                grid[r, c] = rule[str(scanned_states)]
+    elif rule["type"] == "avg": # calculates the avg state of the scanned cells
+        for r in np.arange(1, steps + 1):
+            for c in range(_start_column, _end_column):
+                scanned_states = grid[r - 1, c - down_search: c + up_search + 1]
+                grid[r, c] = rule[round(scanned_states.mean(), 1)]
+
     return grid
 
 class Grid():
@@ -37,7 +50,7 @@ class Grid():
         self._grid = np.array(np.zeros([self._dim + 1, self._dim + 1]))
 
     def visualize(self):
-        fig = plt.figure(figsize=(12, 12))
+        fig = plt.figure(figsize=(32, 32))
         im = plt.imshow(self._grid, interpolation='none', cmap="Greys")
         plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
         plt.title(self.grid_name, loc='right')
@@ -66,8 +79,9 @@ class Grid():
         return self._grid
 
 if __name__ == '__main__':
-    rule = rule_book.rule90_3bits
-    g = Grid(dim=200, grid_name=rule["title"])  # Create grid instance
+    rule = rule_book.code1635_7bits
+    g = Grid(dim=1000, grid_name=rule["title"])  # Create grid instance
     g.init_grid()  # Initialize a plain grid
-    grid = apply_rule(rule=rule, grid=g.get_grid(), steps=200)
+    grid = apply_rule(rule=rule, grid=g.get_grid(), steps=1000)
     g.visualize()
+    0
