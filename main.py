@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
-import rule_book
+import rule_book as rb
 np.set_printoptions(threshold=sys.maxsize)
 
 def apply_rule(rule: dict, grid: np.ndarray, steps=40) -> np.ndarray:
@@ -16,7 +16,7 @@ def apply_rule(rule: dict, grid: np.ndarray, steps=40) -> np.ndarray:
     _dim = grid.shape[0] - 1
 
     if rule["scan"] == 3:
-        _start_column, _end_column, up_search, down_search = 1, _dim, 1, 1
+        _start_column, _end_column, up_search, down_search = 2, _dim - 1, 1, 1
     elif rule["scan"] == 5:
         _start_column, _end_column, up_search, down_search = 2, _dim - 1, 2, 2
     else:
@@ -49,16 +49,19 @@ class Grid():
     def init_grid(self):
         self._grid = np.array(np.zeros([self._dim + 1, self._dim + 1]))
 
-    def visualize(self):
+    def visualize(self, is_display=True, is_save=False):
         fig = plt.figure(figsize=(32, 32))
         im = plt.imshow(self._grid, interpolation='none', cmap="Greys")
         plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
         plt.title(self.grid_name, loc='right')
-        if 0.03 <= self.density <= 0.9:  #and 0.02 <= self.std_col:
+        if is_display:
+            plt.show()
+        if is_save:
+            #if 0.03 <= self.density <= 0.9:  #and 0.02 <= self.std_col:
             path = ""
             file_name = self.grid_name.lower().replace(" ", "_").replace("(", "").replace(")", "")
             fig.savefig(f"data/{path}{file_name}.png", dpi=fig.dpi)
-        #plt.show()
+
 
     @property
     def density(self):
@@ -79,9 +82,8 @@ class Grid():
         return self._grid
 
 if __name__ == '__main__':
-    rule = rule_book.code1635_7bits
-    g = Grid(dim=1000, grid_name=rule["title"])  # Create grid instance
+    rule = rb.Rules8bit.rule30_8bit
+    g = Grid(dim=4000, grid_name=rule["title"])  # Create grid instance
     g.init_grid()  # Initialize a plain grid
-    grid = apply_rule(rule=rule, grid=g.get_grid(), steps=1000)
-    g.visualize()
-    0
+    grid = apply_rule(rule=rule, grid=g.get_grid(), steps=4000)
+    g.visualize(is_display=False, is_save=True)
